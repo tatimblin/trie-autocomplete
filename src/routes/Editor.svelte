@@ -1,54 +1,28 @@
 <script lang="ts">
-    import Dictionary from "$lib/dictionary";
+	import dictionary from "$lib/dictionary";
+    import Input from "./Input.svelte";
 
     let input = "Hello W";
+    let phrase = "W";
+    let index = 0;
 
-    function getCurrentWord(phrase: string): string {
-        return phrase.trim().split(" ").pop() || "";
+    function handleAppend(e: CustomEvent) {
+        phrase = e.detail.lastWord;
     }
 
-    function getTypeahead(suggestions: string[] = [], pop: number = 0): string {
-        if (!suggestions.length) {
-            return "";
-        }
+    function getTypeahead(suggestions: string[]): string {
+        if (!phrase.length) return "";
 
-        return suggestions[0].slice(pop);
+        return suggestions[index].slice(phrase.length);
     }
 
-    function realizeTypeahead() {
-        input += typeahead;
-        currentWord = "";
-    }
-
-    $: currentWord = getCurrentWord(input);
-    $: suggestions = Dictionary.search(currentWord.toLowerCase());
-    $: typeahead = getTypeahead(suggestions, currentWord.length);
+    $: suggestions = dictionary.search(phrase.toLowerCase());
+    $: typeahead = getTypeahead(suggestions);
 </script>
 
-<div
-    class="textarea"
-    contenteditable="true"
-    data-typeahead="{typeahead}"
-    bind:innerHTML={input}
->
-    {input}
-</div>
-<button on:click={realizeTypeahead}>
-    Select
-</button>
-
-<style>
-    .textarea {
-        display: block;
-        padding: 16px 8px;
-        border: 1px solid #c6c6c6;
-        border-radius: 3px;
-        white-space: pre-wrap;
-    }
-
-    .textarea::after {
-        content: attr(data-typeahead);
-        color: #c6c6c6;
-    }
-    
-</style>
+<Input
+    label="Compose Message"
+    typeahead={typeahead}
+    bind:input={input}
+    on:append={handleAppend}
+/>
