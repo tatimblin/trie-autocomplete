@@ -11,7 +11,11 @@
 	function control(event: KeyboardEvent) {
         switch (event.code) {
             case "PageUp":
+                dispatch('next');
+                break;
             case "PageDown":
+                dispatch('previous');
+                break;
             default:
         }
 	}
