@@ -7,13 +7,15 @@
     let index = 0;
 
     function handleAppend(e: CustomEvent) {
+        console.log("append", e.detail.lastWord)
+        index = 0;
         phrase = e.detail.lastWord;
     }
 
     function getTypeahead(suggestions: string[]): string {
         if (!phrase.length) return "";
 
-        return suggestions[index].slice(phrase.length);
+        return suggestions[index]?.slice(phrase.length) || "";
     }
 
     $: suggestions = dictionary.search(phrase.toLowerCase());

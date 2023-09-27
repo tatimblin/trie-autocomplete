@@ -1,5 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
+    import { sanitize } from "$lib";
 
     export let label: string;
     export let typeahead: string;
@@ -7,16 +8,29 @@
 
     const dispatch = createEventDispatcher();
 
-	function watch(event: KeyboardEvent) {
+	function control(event: KeyboardEvent) {
         switch (event.code) {
             case "PageUp":
             case "PageDown":
             default:
-                dispatch('append', {
-                    lastWord: input.split(" ").pop() || "",
-                });
         }
 	}
+
+    function type(event: Event) {
+        const target = event.target as HTMLDivElement;
+
+        if (!target.textContent) {
+            return;
+        }
+
+        if (target.textContent.length === 1) {
+            sanitize(target);
+        }
+
+        dispatch('append', {
+            lastWord: target.textContent?.split(" ").pop() || "",
+        });
+    }
 </script>
 
 <p id="instruction">{label}</p>
@@ -28,7 +42,8 @@
     aria-labelledby="instruction"
     data-typeahead="{typeahead}"
     bind:textContent={input}
-    on:keydown={watch}
+    on:keydown={control}
+    on:input={type}
 >
     {input}
 </div>
