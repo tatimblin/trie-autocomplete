@@ -6,15 +6,22 @@
     export let typeahead: string;
     export let input: string;
 
+    let inputEl;
+    let labelEl;
+
     const dispatch = createEventDispatcher();
 
 	function control(event: KeyboardEvent) {
         switch (event.code) {
             case "PageUp":
-                dispatch('next');
+                dispatch('cycle', 1);
                 break;
             case "PageDown":
-                dispatch('previous');
+                dispatch('cycle', -1);
+                break;
+            case "Tab":
+                event.preventDefault();
+                dispatch('approve', typeahead);
                 break;
             default:
         }
@@ -31,13 +38,17 @@
             sanitize(target);
         }
 
-        dispatch('append', {
-            lastWord: target.textContent?.split(" ").pop() || "",
-        });
+        dispatch('append', target.textContent?.split(" ").pop() || "");
     }
 </script>
 
-<p id="instruction">{label}</p>
+<p
+    class="textarea-label"
+    id="instruction"
+    bind:this={labelEl}
+>
+    {label}:
+</p>
 <div
     class="textarea"
     contenteditable="true"
@@ -45,6 +56,7 @@
     tabindex="-1"
     aria-labelledby="instruction"
     data-typeahead="{typeahead}"
+    bind:this={inputEl}
     bind:textContent={input}
     on:keydown={control}
     on:input={type}
@@ -53,11 +65,15 @@
 </div>
 
 <style>
+    .textarea-label {
+        padding: 8px 16px;
+        color: rgb(87, 95, 104);
+    }
+
     .textarea {
         display: block;
-        padding: 16px 8px;
-        border: 1px solid #c6c6c6;
-        border-radius: 3px;
+
+        padding: 8px 16px;
         white-space: pre-wrap;
     }
 
@@ -65,5 +81,4 @@
         content: attr(data-typeahead);
         color: #c6c6c6;
     }
-    
 </style>

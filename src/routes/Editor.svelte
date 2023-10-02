@@ -6,13 +6,14 @@
     let phrase = "W";
     let index = 0;
 
-    function handleAppend(e: CustomEvent) {
+    function handleAppend(e: CustomEvent<string>) {
         index = 0;
-        phrase = e.detail.lastWord;
+        console.log(e)
+        phrase = e.detail;
     }
 
-    function cycleIndex(relative: number) {
-        let result = index + relative;
+    function cycleIndex(e: CustomEvent<number>) {
+        let result = index + e.detail;
 
         if (result < 0) {
             result = suggestions.length + result;
@@ -36,10 +37,9 @@
 </script>
 
 <Input
-    label="Compose Message"
+    label="Body"
     typeahead={typeahead}
     bind:input={input}
     on:append={handleAppend}
-    on:next={() => cycleIndex(1)}
-    on:previous={() => cycleIndex(-1)}
+    on:cycle={cycleIndex}
 />

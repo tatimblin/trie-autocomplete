@@ -7,12 +7,6 @@ declare global {
 		// interface PageData {}
 		// interface Platform {}
 	}
-
-	declare namespace svelteHTML {
-		interface HTMLAttributes<T> {
-			'on:append'?: (e: CustomEvent<{ lastWord: string }>) => void,
-		}
-	}
 }
 
 export {};
