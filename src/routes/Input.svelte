@@ -67,18 +67,18 @@
 <style>
     .textarea-label {
         padding: 8px 16px;
-        color: rgb(87, 95, 104);
+        color: rgb(131, 141, 153);
     }
 
     .textarea {
         display: block;
-
+        min-height: 6em;
         padding: 8px 16px;
         white-space: pre-wrap;
     }
 
     .textarea::after {
         content: attr(data-typeahead);
-        color: #c6c6c6;
+        color: rgb(160, 172, 187);
     }
 </style>

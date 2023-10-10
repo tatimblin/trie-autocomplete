@@ -11,10 +11,21 @@
 
 <style>
     .wrapper {
+        position: relative;
         display: flex;
         align-items: baseline;
         margin: 4px 0;
-        padding: 8px 16px;
+        padding: 8px 0 8px 16px;
+    }
+
+    .wrapper::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 8px;
+        height: 100%;
+        width: 16px;
+        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
     }
 
     .wrapper:not(:last-child) {
@@ -23,12 +34,13 @@
 
     label {
         font-family: var(--typeface-main);
-        color: rgb(87, 95, 104);
+        color: rgb(131, 141, 153);
     }
 
     .input {
         all: unset;
         width: 100%;
-        padding: 0 8px;
+        padding-left: 8px;
+        margin-right: 8px;
     }
 </style>
