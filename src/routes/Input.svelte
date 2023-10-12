@@ -77,7 +77,11 @@
         white-space: pre-wrap;
     }
 
-    .textarea::after {
+    .textarea:focus {
+        outline: none;
+    }
+
+    .textarea:focus::after {
         content: attr(data-typeahead);
         color: rgb(160, 172, 187);
     }
