@@ -14,7 +14,7 @@
         position: relative;
         display: flex;
         align-items: baseline;
-        margin: 4px 0;
+        margin-top: 4px;
         padding: 8px 0 8px 16px;
     }
 
