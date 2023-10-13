@@ -17,7 +17,7 @@
         <ul class="controls">
             {#each controls as control}
                 <li class="controls-item">
-                    <img class="controls-image" src="{base}{control.src}" alt="">
+                    <img class="controls-image" src="{base}/{control.src}" alt="">
                 </li>
             {/each}
         </ul>
