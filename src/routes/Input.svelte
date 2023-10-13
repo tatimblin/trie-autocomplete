@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
     import { sanitize } from "$lib";
 
     export let label: string;
@@ -54,6 +54,8 @@
         selection?.removeAllRanges();
         selection?.addRange(range);
     }
+
+    onMount(focus);
 </script>
 
 <div class="textarea-wrapper">
