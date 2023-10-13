@@ -20,7 +20,8 @@
                 break;
             case "Tab":
                 event.preventDefault();
-                dispatch('approve', typeahead);
+                dispatch('append', typeahead);
+                setTimeout(setCursor, 1);
                 break;
             default:
         }
@@ -37,17 +38,21 @@
             sanitize(target);
         }
 
-        dispatch('append', target.textContent?.split(" ").pop() || "");
+        dispatch('active', target.textContent?.split(" ").pop() || "");
     }
 
     function focus() {
+        inputEl.focus();
+        setCursor();
+    }
+
+    function setCursor(position = input.length) {
         const range = document.createRange();
         const selection = window.getSelection();
-        range.setStart(inputEl.childNodes[0], input.length);
+        range.setStart(inputEl.childNodes[0], position);
         range.collapse(true);
         selection?.removeAllRanges();
         selection?.addRange(range);
-        inputEl.focus();
     }
 </script>
 

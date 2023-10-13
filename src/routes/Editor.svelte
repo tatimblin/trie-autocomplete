@@ -7,8 +7,12 @@
     let index = 0;
 
     function handleAppend(e: CustomEvent<string>) {
+        input += e.detail;
+        phrase = "";
+    }
+
+    function handleActive(e: CustomEvent<string>) {
         index = 0;
-        console.log(e)
         phrase = e.detail;
     }
 
@@ -41,5 +45,6 @@
     typeahead={typeahead}
     bind:input={input}
     on:append={handleAppend}
+    on:active={handleActive}
     on:cycle={cycleIndex}
 />
