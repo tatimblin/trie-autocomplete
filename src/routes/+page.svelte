@@ -35,7 +35,7 @@
         justify-content: center;
         align-items: center;
         padding: 4px;
-        background-color: rgb(239, 240, 242);
+        background-color: rgb(239, 243, 250);
     }
 
     @media screen and (min-width: 600px) {

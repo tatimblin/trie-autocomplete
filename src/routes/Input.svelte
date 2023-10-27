@@ -19,9 +19,10 @@
                 dispatch('cycle', -1);
                 break;
             case "Tab":
+                if (!typeahead) break;
                 event.preventDefault();
                 dispatch('append', typeahead);
-                setTimeout(setCursor, 1);
+                setCursor();
                 break;
             default:
         }
@@ -73,13 +74,14 @@
         class="textarea"
         contenteditable="true"
         role="textbox"
-        tabindex="-1"
+        tabindex="0"
         aria-labelledby="instruction"
         data-typeahead="{typeahead}"
         bind:this={inputEl}
         bind:textContent={input}
         on:keydown={control}
         on:input={type}
+        on:focus={() => setCursor()}
     >
         {input}
     </div>

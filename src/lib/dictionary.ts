@@ -7,9 +7,9 @@ const words = document.split('\n');
 const dictionary = new Trie();
 console.info("Initialize Trie()");
 
-for (const word of words) {
+for (let i = 0; i < words.length; i++) {
     try {
-        dictionary.add(word);
+        dictionary.add(words[i], i);
     } catch(err) {
         console.error(`Could not add: ${getErrorMessage(err)}`)
     }

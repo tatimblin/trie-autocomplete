@@ -24,7 +24,8 @@
         background-color: rgb(90, 182, 136);
     }
 
-    .button--primary:hover {
+    .button--primary:hover,
+    .button--primary:focus {
         background-color: rgb(79, 167, 123);
     }
 
@@ -34,7 +35,8 @@
         background-color: #fff;
     }
 
-    .button--secondary:hover {
+    .button--secondary:hover,
+    .button--secondary:focus {
         background-color: #f3f3f3;
     }
 </style>

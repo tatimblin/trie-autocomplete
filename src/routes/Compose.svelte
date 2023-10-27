@@ -36,7 +36,7 @@
 
     .compose {
         padding: 6px;
-        background-color: rgb(239, 240, 242);
+        background-color: rgb(243, 245, 249);
         border-radius: 12px;
         border: 1px solid #fff;
         box-shadow: 0px 1px 1px 0px rgb(225, 225, 225);
