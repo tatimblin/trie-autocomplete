@@ -8,3 +8,12 @@ export function getErrorMessage(error: unknown) {
 export function sanitize(el: HTMLElement) {
     el.querySelectorAll("br").forEach((br) => br.remove());
 }
+
+export function setCursor(el: HTMLElement, position = el.innerText.length) {
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.setStart(el.childNodes[0], position);
+    range.collapse(true);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+}

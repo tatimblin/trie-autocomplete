@@ -9,6 +9,9 @@
 </script>
 
 <div class="window">
+    <div>
+        <h1 class="heading">Trie Type-Ahead</h1>
+    </div>
     <div class="wrapper">
         <Compose title="New Message">
             <div class="compose-body">
@@ -26,6 +29,11 @@
             </div>
         </Compose>
     </div>
+    <p class="footer">
+        <span>Part of a <a href="https://github.com/tatimblin/data-structures#contents" target="_blank">front-end with data-structures demos</a> collection</span>
+        <span>•</span>
+        <span>Built in <a href="https://g.co/kgs/1eP9TL" target="_blank">Kiawah Island, SC</a></span>
+    </p>
 </div>
 
 <style>
@@ -34,15 +42,20 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 4px;
+        min-height: 100dvh;
+        padding: 0 4px;
         background-color: rgb(239, 243, 250);
     }
 
     @media screen and (min-width: 600px) {
         .window {
-            min-height: 100dvh;
             padding: 0;
         }
+    }
+
+    .heading {
+        font-size: 24px;
+        font-weight: 600;
     }
 
     .wrapper {
@@ -62,5 +75,10 @@
         justify-content: space-between;
         gap: 32px;
         padding: 16px;
+    }
+
+    .footer {
+        text-align: center;
+        line-height: 1.5em;
     }
 </style>

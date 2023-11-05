@@ -2,8 +2,8 @@
 	import dictionary from "$lib/dictionary";
     import Input from "./Input.svelte";
 
-    let input = "Hello W";
-    let phrase = "W";
+    let input = "Hello Wor";
+    let phrase = "Wor";
     let index = 0;
 
     function handleAppend(e: CustomEvent<string>) {

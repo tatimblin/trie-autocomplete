@@ -1,12 +1,12 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from 'svelte';
-    import { sanitize } from "$lib";
+    import { sanitize, setCursor } from "$lib";
 
     export let label: string;
     export let typeahead: string;
     export let input: string;
 
-    let inputEl: HTMLDivElement;
+    let inputEl: HTMLSpanElement;
 
     const dispatch = createEventDispatcher();
 
@@ -22,14 +22,15 @@
                 if (!typeahead) break;
                 event.preventDefault();
                 dispatch('append', typeahead);
-                setCursor();
+                setTimeout(() => setCursor(inputEl), 1);
                 break;
             default:
         }
 	}
 
     function type(event: Event) {
-        const target = event.target as HTMLDivElement;
+        console.log("input", typeahead)
+        const target = event.target as HTMLSpanElement;
 
         if (!target.textContent) {
             return;
@@ -44,51 +45,64 @@
 
     function focus() {
         inputEl.focus();
-        setCursor();
+        setCursor(inputEl);
     }
 
-    function setCursor(position = input.length) {
-        const range = document.createRange();
-        const selection = window.getSelection();
-        range.setStart(inputEl.childNodes[0], position);
-        range.collapse(true);
-        selection?.removeAllRanges();
-        selection?.addRange(range);
+    function handleClick() {
+        dispatch('append', typeahead);
+        setCursor(inputEl);
     }
 
     onMount(focus);
 </script>
 
-<div class="textarea-wrapper">
+<div
+    class="textarea-wrapper"
+    role="button"
+    tabindex="-1"
+    on:click={focus}
+    on:keydown={focus}
+>
     <div
         class="textarea-label"
         id="instruction"
-        on:click={focus}
-        on:keydown={focus}
-        role="button"
-        tabindex="-1"
     >
         {label}:
     </div>
     <div
         class="textarea"
-        contenteditable="true"
-        role="textbox"
-        tabindex="0"
-        aria-labelledby="instruction"
-        data-typeahead="{typeahead}"
-        bind:this={inputEl}
-        bind:textContent={input}
-        on:keydown={control}
-        on:input={type}
-        on:focus={() => setCursor()}
     >
-        {input}
+        <span
+            class="textarea-text"
+            contenteditable="true"
+            aria-labelledby="instruction"
+            role="textbox"
+            tabindex="0"
+            bind:textContent={input}
+            bind:this={inputEl}
+            on:click|stopPropagation={() => {}}
+            on:keydown|stopPropagation={control}
+            on:input={type}
+        >
+            {input}
+        </span>
+        <span class="test"></span>
+        <span
+            class="textarea-after"
+            contenteditable="false"
+            role="button"
+            tabindex="0"
+            on:click={handleClick}
+            on:keypress={handleClick}
+        >
+            {typeahead}
+        </span>
     </div>
 </div>
 
 <style>
     .textarea-wrapper {
+        min-height: 10em;
         border: 2px dashed transparent;
     }
 
@@ -102,18 +116,28 @@
     }
 
     .textarea {
-        display: block;
-        min-height: 6em;
         padding: 8px 14px;
         white-space: pre-wrap;
+        outline: none;
+        font-size: 0;
     }
 
-    .textarea:focus {
+    .textarea-text {
+        font-size: 12px;
+    }
+
+    .textarea-text:focus {
         outline: none;
     }
 
-    .textarea:focus::after {
-        content: attr(data-typeahead);
+    .textarea-after {
+        display: none;
         color: rgb(160, 172, 187);
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .textarea:focus-within .textarea-after {
+        display: inline
     }
 </style>
