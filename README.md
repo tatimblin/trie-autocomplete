@@ -1,8 +1,8 @@
 # trie-autocomplete
 
-<div style="text-align: center">
-    <img src="screenshot.png" style="max-width: 500px;" />
-</div>
+<p align="center">
+    <img src="screenshot.png" width="500px" />
+</p>
 
 [Try it live](https://tatimblin.github.io/trie-autocomplete/)
 
