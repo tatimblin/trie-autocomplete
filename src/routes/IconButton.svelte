@@ -11,7 +11,7 @@
 </script>
 
 <button class="IconButton" on:click={handleClick}>
-    <img src="/{icon}.png" alt={icon} class="IconButton-img">
+    <img src="{icon}.png" alt={icon} class="IconButton-img">
 </button>
 
 <style>
