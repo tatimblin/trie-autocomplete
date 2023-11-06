@@ -1,13 +1,18 @@
 <script lang="ts">
 	import dictionary from "$lib/dictionary";
     import Input from "./Input.svelte";
+    import ControlBar from "./ControlBar.svelte";
 
     let input = "Hello Wor";
     let phrase = "Wor";
     let index = 0;
 
     function handleAppend(e: CustomEvent<string>) {
-        input += e.detail;
+        if (e.detail) {
+            input += e.detail + " ";
+        } else {
+            input += typeahead + " ";
+        }
         phrase = "";
     }
 
@@ -46,5 +51,11 @@
     bind:input={input}
     on:append={handleAppend}
     on:active={handleActive}
+    on:cycle={cycleIndex}
+/>
+<ControlBar
+    suggestion={suggestions[index]}
+    enable={!!phrase.length}
+    on:append={handleAppend}
     on:cycle={cycleIndex}
 />

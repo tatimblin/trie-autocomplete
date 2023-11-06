@@ -9,8 +9,9 @@
 </script>
 
 <div class="window">
-    <div>
-        <h1 class="heading">Trie Type-Ahead</h1>
+    <div class="Heading">
+        <h1 class="Heading-title">Trie Type-Ahead</h1>
+        <p class="Heading-sub">Try typing in the body, use <i>Tab</i> to select a suggestion or PageUp/PageDown to switch between them.</p>
     </div>
     <div class="wrapper">
         <Compose title="New Message">
@@ -31,6 +32,8 @@
     </div>
     <p class="footer">
         <span>Part of a <a href="https://github.com/tatimblin/data-structures#contents" target="_blank">front-end with data-structures demos</a> collection</span>
+        <span>•</span>
+        <span>Design by <a href="https://dribbble.com/shots/22272293-Widgets-for-Template-Creator-App" target="_blank">Slick</a></span>
         <span>•</span>
         <span>Built in <a href="https://g.co/kgs/1eP9TL" target="_blank">Kiawah Island, SC</a></span>
     </p>
@@ -53,9 +56,18 @@
         }
     }
 
-    .heading {
+    .Heading {
+        text-align: center;
+        line-height: 2em;
+    }
+
+    .Heading-title {
         font-size: 24px;
         font-weight: 600;
+    }
+
+    .Heading-sub {
+        color: #707070;
     }
 
     .wrapper {
@@ -80,5 +92,6 @@
     .footer {
         text-align: center;
         line-height: 1.5em;
+        color: #707070;
     }
 </style>
