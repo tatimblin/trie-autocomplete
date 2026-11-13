@@ -15,8 +15,9 @@
     import { setCursor } from "$lib";
 
     // What the demo writes. The last word stops half-typed, as soon as it's
-    // the gray suggestion, and is left for the reader to take.
-    const SENTENCE = "I want to see New York as soon as possible";
+    // the gray suggestion, and is left for the reader to take. Most words
+    // here are guessed from their first letter and the word before.
+    const SENTENCE = "I want to go to New York";
 
     const KEY_MS = 130;
     const THINK_MS = 650;

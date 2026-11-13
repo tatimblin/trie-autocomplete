@@ -1,0 +1,12 @@
+trie-autocomplete
+
+src/lib/data/next-words.txt is derived from the English sentences of
+Tatoeba (https://tatoeba.org), a collection of sentences and translations
+contributed by its members. Tatoeba's sentences are licensed under the
+Creative Commons Attribution 2.0 France licence (CC BY 2.0 FR):
+https://creativecommons.org/licenses/by/2.0/fr/
+
+The file lists, for 500 common words, the words that most often follow
+them in those sentences. It was made by counting pairs of words in the
+export at https://downloads.tatoeba.org/exports/per_language/eng/eng_sentences.tsv.bz2
+with scripts/build-next-words.mjs; no sentences are included.

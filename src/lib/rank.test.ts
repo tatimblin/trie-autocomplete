@@ -1,14 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { ranker } from "./rank";
+import { ranker, type Sources } from "./rank";
 import { Session } from "./session";
 import { parseContext, suggest } from "./suggest";
-import { search, words } from "./dictionary";
+import { nextWords, search, words } from "./dictionary";
+import { parseNextWords } from "./next-words";
 
 // A small word list, most common first.
 const list = ["the", "to", "that", "this", "time", "trie", "email", "employ"];
 const listSearch = (prefix: string) => list.filter((word) => word.startsWith(prefix));
 
-function field(source = { search: listSearch, words: list }) {
+function field(source: Omit<Sources, "session"> = { search: listSearch, words: list }) {
 	const session = new Session();
 	const lookup = ranker({ ...source, session });
 	return (text: string) => {
@@ -61,6 +62,55 @@ describe("ranker", () => {
 		const guess = field({ search, words });
 		expect(guess("Lunch with Priya on Friday? Priya said Fri")[0]).toBe("Friday");
 		expect(guess("Lunch with Priya on Friday? Priya said Fri yes. Pr")[0]).toBe("Priya");
+	});
+});
+
+describe("parseNextWords", () => {
+	it("gives earlier followers bigger shares, summing to a half", () => {
+		const table = parseNextWords("new york car job\n<s> i\n\nlonely\n");
+		const york = table.get("new");
+		expect([...(york?.keys() ?? [])]).toEqual(["york", "car", "job"]);
+		expect(york?.get("york")).toBeGreaterThan(york?.get("car") ?? 1);
+		expect([...(york?.values() ?? [])].reduce((a, b) => a + b)).toBeCloseTo(0.5);
+		expect(table.get("<s>")?.get("i")).toBeCloseTo(0.5);
+		// A word with no followers isn't kept.
+		expect(table.has("lonely")).toBe(false);
+	});
+
+	it("reads the shipped table", () => {
+		expect(nextWords.size).toBeGreaterThan(400);
+		expect(nextWords.get("new")?.has("york")).toBe(true);
+	});
+});
+
+describe("ranker with the word before", () => {
+	const table = parseNextWords("i want think\nwant to\n<s> this");
+
+	it("puts the usual follower first", () => {
+		const lookup = ranker({ search: listSearch, words: list, nextWords: table });
+		expect(lookup("t", null)[0]).toBe("the");
+		expect(lookup("t", "want")[0]).toBe("to");
+		expect(lookup("t", "<s>")[0]).toBe("this");
+	});
+
+	it("keeps frequency order after a word it doesn't know", () => {
+		const lookup = ranker({ search: listSearch, words: list, nextWords: table });
+		expect(lookup("t", "banana")).toEqual(listSearch("t"));
+	});
+
+	it("lets a pair typed in the field beat the table", () => {
+		const guess = field({ search, words, nextWords });
+		expect(guess("I want t")[0]).toBe("to");
+		expect(guess("I want tea. I want t")[0]).toBe("tea");
+	});
+
+	it("guesses from the first letter with the real table", () => {
+		const guess = field({ search, words, nextWords });
+		expect(guess("I want t")[0]).toBe("to");
+		expect(guess("Have a g")[0]).toBe("good");
+		expect(guess("New Y")[0]).toBe("York");
+		expect(guess("What do you t")[0]).toBe("think");
+		expect(guess("I am g")[0]).toBe("going");
 	});
 });
 

@@ -8,9 +8,12 @@ export type Search = (prefix: string, prior: string | null) => string[];
 export interface Context {
 	/** The word being typed, as typed (case kept, leading punctuation dropped). Empty when there's nothing to complete. */
 	partial: string;
-	/** The word before it, lowercased, or null at the start of the text or after punctuation. */
+	/** The word before it, lowercased; START at the start of the text or a sentence; null after other punctuation. */
 	prior: string | null;
 }
+
+/** The prior at the start of the text or of a sentence. */
+export const START = "<s>";
 
 /** How many suggestions to cycle through. */
 export const LIMIT = 10;
@@ -21,10 +24,16 @@ const OPENER = /^[^a-z0-9]+/i;
 // Punctuation that can close one: `word,`, `word."`.
 const CLOSER = /[^a-z0-9]+$/i;
 
+// A sentence's last token: "end.", "end?)", `end!"`.
+const ENDS = /[.!?]["'”’)\]]*$/;
+
 // The word before `token`, if nothing separates them: "Hello wor" but not
-// "Hello. Wor", "Hello, wor" or `"Hello" wor`.
+// "Hello, wor" or `"Hello" wor`. START when `token` opens the text or a
+// sentence: "Wor", "Hello. Wor".
 function priorOf(before: string | undefined, token: string): string | null {
-	if (before === undefined || OPENER.test(token)) return null;
+	if (OPENER.test(token)) return null;
+	// The text's first token comes after "" when the text opens with a space.
+	if (!before || ENDS.test(before)) return START;
 	const word = before.replace(OPENER, "");
 	return WORD.test(word) ? word.toLowerCase() : null;
 }
