@@ -1,13 +1,14 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
     import IconButton from "./IconButton.svelte";
+    import type { Icon } from "./icons";
 
     export let suggestion: string;
     export let enable: boolean;
 
     const dispatch = createEventDispatcher();
 
-    const icons = ["bold", "align", "link", "attach"];
+    const icons: Icon[] = ["bold", "align", "link", "attach"];
 </script>
 
 <div class="ControlBar">

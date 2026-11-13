@@ -1,7 +1,8 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
+    import { icons, type Icon } from "./icons";
 
-    export let icon: string;
+    export let icon: Icon;
 
     const dispatch = createEventDispatcher();
 
@@ -11,7 +12,7 @@
 </script>
 
 <button class="IconButton" on:click={handleClick}>
-    <img src="{icon}.png" alt={icon} class="IconButton-img">
+    <img src={icons[icon]} alt={icon} class="IconButton-img">
 </button>
 
 <style>

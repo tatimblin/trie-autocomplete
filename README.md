@@ -15,6 +15,17 @@ An implementation of a suggest-as-you-go typing experience found in many WYSIWYG
 3. Use `Tab`, click the light grey suggestion, or click the complete word on the bottom right to approve a suggestion.
 4. Use `PageUp`/`PageDown` or the Left/Right arrows in the bottom right to cycle through available suggestions.
 
+## embed
+
+The app also ships as one ES module, `dist/index.js`, which [tristantimblin.dev](https://tristantimblin.dev/demo/trie-autocomplete/) loads from jsDelivr at a release tag:
+
+```js
+import { mount } from "https://cdn.jsdelivr.net/gh/tatimblin/trie-autocomplete@v0.1.0/dist/index.js";
+const { destroy } = mount(el, { assetBase }); // fills `el`; destroy() removes it
+```
+
+`npm run build:embed` rebuilds it. `dist/` is committed so a tag serves it; to release, bump `version`, rebuild, commit, and tag `v<version>`. Never move a tag: jsDelivr caches it.
+
 ## data-structures
 
 Part of the [front-end data-structures collection](https://github.com/tatimblin/data-structures), a series of isolated examples that illustrate  computer science fundamentals in front-end development.

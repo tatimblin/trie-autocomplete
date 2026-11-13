@@ -1,12 +1,9 @@
 <script lang="ts">
-    import { base } from "$app/paths";
+    import { icons } from "./icons";
 
     export let title: string;
 
-    const controls = [
-        { src: "expand.png" },
-        { src: "close.png" },
-    ];
+    const controls = [icons.expand, icons.close];
 </script>
 
 <main class="compose">
@@ -17,7 +14,7 @@
         <ul class="controls">
             {#each controls as control}
                 <li class="controls-item">
-                    <img class="controls-image" src="{base}/{control.src}" alt="">
+                    <img class="controls-image" src={control} alt="">
                 </li>
             {/each}
         </ul>

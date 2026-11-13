@@ -10,6 +10,7 @@ export function sanitize(el: HTMLElement) {
 }
 
 export function setCursor(el: HTMLElement, position = el.innerText.length) {
+    if (!el.childNodes[0]) return;
     const range = document.createRange();
     const selection = window.getSelection();
     range.setStart(el.childNodes[0], position);
