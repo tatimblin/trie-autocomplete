@@ -1,45 +1,32 @@
 <script lang="ts">
-    // Plays a short scripted demo in the field on load: it types a few
-    // letters, the trie guesses the rest, and the demo accepts. It has no UI
-    // of its own; it drives the field the way a person would, through its DOM
+    // Plays a short demo in the field on load: it types a sentence a letter
+    // at a time and, after every letter, looks at the suggestions. As soon as
+    // the word it's typing is among them, it takes it: the gray one with Tab
+    // (or the green button on a phone), another one with PgDn then Tab (or a
+    // tap on it). A word that never shows up is typed out. It has no UI of
+    // its own; it drives the field the way a person would, through its DOM
     // (text + input events, Tab/PageDown keydowns, clicks on the buttons), so
-    // it needs nothing from Editor. A real tap or keypress stops it: a tap on
-    // the sentence hands the field over with the caret at the end, a key
-    // types, and a tap on a suggestion does what it always does. With reduced
-    // motion it skips straight to the end.
-    import { onDestroy, onMount } from "svelte";
+    // it needs nothing from Editor and follows whatever the suggestions are.
+    // A real tap or keypress stops it: a tap on the sentence hands the field
+    // over with the caret at the end, a key types, and a tap on a suggestion
+    // does what it always does. With reduced motion it skips straight to the
+    // end.
+    import { onDestroy, onMount, tick } from "svelte";
     import { setCursor } from "$lib";
 
-    type Step =
-        | { type: string }
-        // Take the gray suggestion.
-        | { accept: true }
-        // Take the nth suggestion instead (0 is the gray one).
-        | { pick: number };
-
-    // Written against the ranked suggestions of feat/rank-suggestions: each
-    // accepted word is the top suggestion for its letters, and "work" is the
-    // second for "wor", after "world".
-    const SCRIPT: Step[] = [
-        { type: "Pe" }, { accept: true },
-        { type: "li" }, { accept: true },
-        { type: "th" }, { accept: true },
-        { type: "gre" }, { accept: true },
-        { type: "wor" }, { pick: 1 },
-        { type: "on " },
-        { type: "thi" }, { accept: true },
-        { type: "proj" },
-    ];
-    // Where the script ends: a word left half-typed, its rest in gray.
-    const END = "People like the great work on this proj";
+    // What the demo writes. The last word stops half-typed, as soon as it's
+    // the gray suggestion, and is left for the reader to take.
+    const SENTENCE = "I want to see New York as soon as possible";
 
     const KEY_MS = 130;
     const THINK_MS = 650;
+    const STEP_MS = 300;
     const SETTLE_MS = 350;
 
     let marker: HTMLElement;
     let root: HTMLElement | null = null;
     let playing = false;
+    let reduced = false;
     // Set when a tap on the sentence stopped the demo: its click then puts
     // the caret at the end, where the reader carries on.
     let handOver = false;
@@ -53,6 +40,15 @@
         timers.add(timer);
     }
 
+    // Waits, then answers whether to carry on. stop() clears the timers, so
+    // a stopped demo's wait never ends. With reduced motion it only waits for
+    // the field to update, so the demo reaches its end before anything paints.
+    async function pause(ms: number) {
+        if (reduced) await tick();
+        else await new Promise<void>((resolve) => later(ms, resolve));
+        return playing;
+    }
+
     const field = () => root?.querySelector<HTMLElement>('[role="textbox"]') ?? null;
     const mouse = () => matchMedia("(hover: hover) and (pointer: fine)").matches;
 
@@ -64,55 +60,66 @@
         if (document.activeElement === input) setCursor(input);
     }
 
+    function type(text: string) {
+        setText((field()?.textContent ?? "") + text);
+    }
+
     function key(code: string) {
         field()?.dispatchEvent(
             new KeyboardEvent("keydown", { code, key: code, bubbles: true, cancelable: true }),
         );
     }
 
-    function typeOut(text: string, done: () => void, i = 0) {
-        if (i >= text.length) return done();
-        later(KEY_MS + (i % 3) * 40, () => {
-            setText((field()?.textContent ?? "") + text[i]);
-            typeOut(text, done, i + 1);
-        });
+    // The suggestions on show; the first is the gray one.
+    const shown = () => [...(root?.querySelectorAll<HTMLElement>(".alt") ?? [])];
+
+    function find(word: string) {
+        const wanted = word.toLowerCase();
+        return shown().findIndex((alt) => alt.textContent?.toLowerCase() === wanted);
     }
 
-    function step(i = 0) {
-        const next = () => later(SETTLE_MS, () => step(i + 1));
-        const s = SCRIPT[i];
-        if (!s) {
-            playing = false;
-            return;
-        }
-        if ("type" in s) {
-            typeOut(s.type, () => step(i + 1));
-        } else if ("accept" in s) {
-            later(THINK_MS, () => {
-                if (mouse()) key("Tab");
-                else root?.querySelector<HTMLElement>(".accept")?.click();
-                next();
-            });
-        } else if (mouse()) {
-            // Walk the highlight to the pick with PgDn, then take it.
-            let n = 0;
-            const walk = () =>
-                later(THINK_MS, () => {
-                    if (n++ < s.pick) {
-                        key("PageDown");
-                        walk();
-                    } else {
-                        key("Tab");
-                        next();
-                    }
-                });
-            walk();
+    // Takes the suggestion at `index`, the way a person would.
+    async function choose(index: number) {
+        if (!(await pause(THINK_MS))) return false;
+        if (mouse()) {
+            for (let n = 0; n < index; n++) {
+                key("PageDown");
+                if (!(await pause(STEP_MS))) return false;
+            }
+            key("Tab");
+        } else if (index === 0) {
+            root?.querySelector<HTMLElement>(".accept")?.click();
         } else {
-            later(THINK_MS, () => {
-                root?.querySelectorAll<HTMLElement>(".alt")[s.pick]?.click();
-                next();
-            });
+            shown()[index]?.click();
         }
+        return pause(SETTLE_MS);
+    }
+
+    // Types `word` until it's suggested, then takes it (or, for the last
+    // word, stops once it's the gray one). Answers whether to carry on.
+    async function write(word: string, last: boolean) {
+        for (let k = 1; k <= word.length; k++) {
+            if (!(await pause(KEY_MS + (k % 3) * 40))) return false;
+            type(word[k - 1]);
+            // Typed out: there's nothing left to suggest.
+            if (k === word.length) break;
+            if (!(await pause(0))) return false;
+            const index = find(word);
+            if (last && index === 0) return false;
+            if (!last && index >= 0) return choose(index);
+        }
+        if (last) return false;
+        if (!(await pause(KEY_MS))) return false;
+        type(" ");
+        return true;
+    }
+
+    async function play() {
+        const words = SENTENCE.split(" ");
+        for (const [i, word] of words.entries()) {
+            if (!(await write(word, i === words.length - 1))) break;
+        }
+        playing = false;
     }
 
     function stop() {
@@ -152,15 +159,17 @@
         root?.addEventListener("keydown", interrupt, true);
         root?.addEventListener("click", caretToEnd, true);
 
-        if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-            setText(END);
-            // Ready to type with a keyboard; a phone waits for its tap.
-            if (mouse()) ready();
-            return;
-        }
         playing = true;
         setText("");
-        later(500, () => step());
+        reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduced) {
+            // Ready to type with a keyboard; a phone waits for its tap.
+            play().then(() => {
+                if (mouse()) ready();
+            });
+        } else {
+            later(500, play);
+        }
     });
 
     onDestroy(() => {
