@@ -1,4 +1,5 @@
 <script lang="ts">
+    import Autoplay from "./Autoplay.svelte";
     import Editor from "./Editor.svelte";
 </script>
 
@@ -9,6 +10,7 @@
             Type anything. The faded letters are the trie’s guess for the rest of
             the word, from the 10,000 most common English words.
         </p>
+        <Autoplay />
         <div class="editor">
             <Editor />
         </div>
