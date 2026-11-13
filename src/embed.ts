@@ -1,7 +1,7 @@
 // The app as an embed for tristantimblin.dev: `mount(el, { assetBase })`
 // renders it into `el`, filling it, and returns `{ destroy }`. Built by
 // vite.embed.config.ts into one ES module, dist/index.js, with the
-// components' CSS, the scoped reset and the icons inside it. `assetBase` is
+// components' CSS and the scoped reset inside it. `assetBase` is
 // part of the contract but unused: the bundle loads nothing of its own.
 import App from "./lib/app/App.svelte";
 import reset from "./lib/app/reset.css?inline";

@@ -9,12 +9,14 @@ export function sanitize(el: HTMLElement) {
     el.querySelectorAll("br").forEach((br) => br.remove());
 }
 
-export function setCursor(el: HTMLElement, position = el.innerText.length) {
-    if (!el.childNodes[0]) return;
+// Puts the caret at the end of `el`. Selecting its contents and collapsing to
+// the end holds however the browser has split the text into nodes, where an
+// offset into the first text node can overrun it (and throw) or fall short.
+export function setCursor(el: HTMLElement) {
     const range = document.createRange();
     const selection = window.getSelection();
-    range.setStart(el.childNodes[0], position);
-    range.collapse(true);
+    range.selectNodeContents(el);
+    range.collapse(false);
     selection?.removeAllRanges();
     selection?.addRange(range);
 }
