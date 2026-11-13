@@ -29,7 +29,6 @@
 	}
 
     function type(event: Event) {
-        console.log("input", typeahead)
         const target = event.target as HTMLSpanElement;
 
         if (!target.textContent) {
