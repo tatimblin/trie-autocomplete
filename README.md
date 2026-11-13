@@ -17,14 +17,14 @@ An implementation of a suggest-as-you-go typing experience found in many WYSIWYG
 
 ## embed
 
-The app also ships as one ES module, `dist/index.js`, which [tristantimblin.dev](https://tristantimblin.dev/demo/trie-autocomplete/) loads from jsDelivr at a release tag:
+The app also ships as one ES module, `dist/index.js`, which [tristantimblin.dev](https://tristantimblin.dev/demo/trie-autocomplete/) loads from GitHub Pages:
 
 ```js
-import { mount } from "https://cdn.jsdelivr.net/gh/tatimblin/trie-autocomplete@v0.1.0/dist/index.js";
+import { mount } from "https://tatimblin.github.io/trie-autocomplete/dist/index.js";
 const { destroy } = mount(el, { assetBase }); // fills `el`; destroy() removes it
 ```
 
-`npm run build:embed` rebuilds it. `dist/` is committed so a tag serves it; to release, bump `version`, rebuild, commit, and tag `v<version>`. Never move a tag: jsDelivr caches it.
+`npm run build:embed` builds it locally. To release, bump `version`, merge, and tag `v<version>` on main: the Pages workflow builds the page and the embed and deploys both.
 
 ## data-structures
 
