@@ -77,7 +77,12 @@
         setCursor(inputEl);
     }
 
-    onMount(focus);
+    // Ready to type with a keyboard. Not on a touch screen: focus without a
+    // tap doesn't bring a phone's keyboard up, and a field that's already
+    // focused can leave the first tap with nothing to do.
+    onMount(() => {
+        if (matchMedia("(hover: hover) and (pointer: fine)").matches) focus();
+    });
 </script>
 
 <!-- A click on the empty part of the field focuses it; the keyboard reaches
