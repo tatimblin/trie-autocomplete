@@ -42,7 +42,7 @@
             case "Tab":
                 if (!typeahead) break;
                 event.preventDefault();
-                accept(typeahead);
+                accept(typeahead, event);
                 break;
             default:
         }
@@ -69,12 +69,16 @@
     // Adds `rest` to the word being typed, then puts the caret back after it.
     // The buttons that call this cancel pointerdown/mousedown, so the field
     // keeps focus and a phone keeps its keyboard up; focus() is the fallback
-    // for a browser that moved focus anyway.
-    async function accept(rest: string) {
+    // for a browser that moved focus anyway. The demo's scripted accepts
+    // (untrusted events) leave focus alone, so a phone's first real tap still
+    // raises its keyboard.
+    async function accept(rest: string, event: Event) {
         dispatch('append', rest);
         await tick();
-        if (document.activeElement !== inputEl) inputEl.focus({ preventScroll: true });
-        setCursor(inputEl);
+        if (event.isTrusted && document.activeElement !== inputEl) {
+            inputEl.focus({ preventScroll: true });
+        }
+        if (document.activeElement === inputEl) setCursor(inputEl);
     }
 
     // Ready to type with a keyboard. Not on a touch screen: focus without a
@@ -113,7 +117,7 @@
                 aria-hidden="true"
                 on:pointerdown|preventDefault
                 on:mousedown|preventDefault
-                on:click|stopPropagation={() => accept(typeahead)}
+                on:click|stopPropagation={(e) => accept(typeahead, e)}
             >{typeahead}</span
             >{#if typeahead}<button
                     class="accept"
@@ -121,7 +125,7 @@
                     aria-label={`Accept “${spell(suggestions[index] ?? "")}”`}
                     on:pointerdown|preventDefault
                     on:mousedown|preventDefault
-                    on:click|stopPropagation={() => accept(typeahead)}
+                    on:click|stopPropagation={(e) => accept(typeahead, e)}
                 ><span class="touch">tap ✓</span><span class="keys">Tab ⇥</span></button
             >{/if}</span
         >
@@ -143,7 +147,7 @@
                         type="button"
                         on:pointerdown|preventDefault
                         on:mousedown|preventDefault
-                        on:click={() => accept(word.slice(partial.length))}
+                        on:click={(e) => accept(word.slice(partial.length), e)}
                     >{spell(word)}</button>
                 </li>
             {/each}
