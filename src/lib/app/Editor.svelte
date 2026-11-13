@@ -2,7 +2,6 @@
 	import { search } from "$lib/dictionary";
 	import { cycle, parseContext, suggest } from "$lib/suggest";
     import Input from "./Input.svelte";
-    import ControlBar from "./ControlBar.svelte";
 
     let input = "Hello Wor";
     let index = 0;
@@ -30,16 +29,13 @@
 </script>
 
 <Input
-    label="Body"
+    label="Message"
     typeahead={typeahead}
+    partial={context.partial}
+    suggestions={suggestions}
+    index={index}
     bind:input={input}
     on:append={handleAppend}
     on:active={handleActive}
-    on:cycle={cycleIndex}
-/>
-<ControlBar
-    suggestion={suggestions[index]}
-    enable={!!context.partial}
-    on:append={handleAppend}
     on:cycle={cycleIndex}
 />

@@ -10,10 +10,9 @@ An implementation of a suggest-as-you-go typing experience found in many WYSIWYG
 
 ## usage
 
-1. The Body is the only field with this functionality enabled.
-2. Begin typing to see suggestions for the remainder of word in light grey.
-3. Use `Tab`, click the light grey suggestion, or click the complete word on the bottom right to approve a suggestion.
-4. Use `PageUp`/`PageDown` or the Left/Right arrows in the bottom right to cycle through available suggestions.
+1. Begin typing to see the rest of the word in light grey.
+2. Press `Tab`, or tap/click the grey letters or the green button after them, to accept it.
+3. The line below lists other suggestions: tap/click one to accept it, or use `PageUp`/`PageDown` to move the highlight (and the grey letters) through them.
 
 ## embed
 
