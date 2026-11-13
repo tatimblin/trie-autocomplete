@@ -1,10 +1,12 @@
 <script lang="ts">
     // Plays a short scripted demo in the field on load: it types a few
-    // letters, the trie guesses the rest, and the demo accepts. It drives the
-    // field the way a person would, through its DOM (text + input events,
-    // Tab/PageDown keydowns, clicks on the buttons), so it needs nothing from
-    // Editor. Any real tap or keypress stops it and leaves the field to the
-    // person. With reduced motion it skips straight to the end.
+    // letters, the trie guesses the rest, and the demo accepts. It has no UI
+    // of its own; it drives the field the way a person would, through its DOM
+    // (text + input events, Tab/PageDown keydowns, clicks on the buttons), so
+    // it needs nothing from Editor. A real tap or keypress stops it: a tap on
+    // the sentence hands the field over with the caret at the end, a key
+    // types, and a tap on a suggestion does what it always does. With reduced
+    // motion it skips straight to the end.
     import { onDestroy, onMount } from "svelte";
     import { setCursor } from "$lib";
 
@@ -35,13 +37,13 @@
     const THINK_MS = 650;
     const SETTLE_MS = 350;
 
-    let el: HTMLElement;
+    let marker: HTMLElement;
     let root: HTMLElement | null = null;
-    // "idle" until mounted, so the prerendered page shows neither control.
-    let state: "idle" | "playing" | "done" = "idle";
-    let instant = false;
-    let keys: string[] = [];
-    let timers = new Set<ReturnType<typeof setTimeout>>();
+    let playing = false;
+    // Set when a tap on the sentence stopped the demo: its click then puts
+    // the caret at the end, where the reader carries on.
+    let handOver = false;
+    const timers = new Set<ReturnType<typeof setTimeout>>();
 
     function later(ms: number, fn: () => void) {
         const timer = setTimeout(() => {
@@ -53,10 +55,6 @@
 
     const field = () => root?.querySelector<HTMLElement>('[role="textbox"]') ?? null;
     const mouse = () => matchMedia("(hover: hover) and (pointer: fine)").matches;
-
-    function press(label: string) {
-        keys = [...keys, label].slice(-10);
-    }
 
     function setText(text: string) {
         const input = field();
@@ -76,7 +74,6 @@
         if (i >= text.length) return done();
         later(KEY_MS + (i % 3) * 40, () => {
             setText((field()?.textContent ?? "") + text[i]);
-            press(text[i] === " " ? "␣" : text[i]);
             typeOut(text, done, i + 1);
         });
     }
@@ -85,20 +82,15 @@
         const next = () => later(SETTLE_MS, () => step(i + 1));
         const s = SCRIPT[i];
         if (!s) {
-            state = "done";
+            playing = false;
             return;
         }
         if ("type" in s) {
             typeOut(s.type, () => step(i + 1));
         } else if ("accept" in s) {
             later(THINK_MS, () => {
-                if (mouse()) {
-                    key("Tab");
-                    press("Tab ⇥");
-                } else {
-                    root?.querySelector<HTMLElement>(".accept")?.click();
-                    press("tap ✓");
-                }
+                if (mouse()) key("Tab");
+                else root?.querySelector<HTMLElement>(".accept")?.click();
                 next();
             });
         } else if (mouse()) {
@@ -108,52 +100,46 @@
                 later(THINK_MS, () => {
                     if (n++ < s.pick) {
                         key("PageDown");
-                        press("PgDn");
                         walk();
                     } else {
                         key("Tab");
-                        press("Tab ⇥");
                         next();
                     }
                 });
             walk();
         } else {
             later(THINK_MS, () => {
-                const alt = root?.querySelectorAll<HTMLElement>(".alt")[s.pick];
-                press(`tap “${alt?.textContent ?? ""}”`);
-                alt?.click();
+                root?.querySelectorAll<HTMLElement>(".alt")[s.pick]?.click();
                 next();
             });
         }
     }
 
-    function play() {
-        stop();
-        keys = [];
-        state = "playing";
-        setText("");
-        later(500, () => step());
-    }
-
     function stop() {
         timers.forEach(clearTimeout);
         timers.clear();
-        state = "done";
+        playing = false;
     }
 
-    // A real tap or keypress anywhere in the demo. Capture, so it's seen
-    // before the field's own key handling, and before that key lands. Not
-    // for this component's own buttons: stopping on their pointerdown would
-    // remove "Type yourself" before its click.
+    // A real tap or keypress in the demo. Capture, so it's seen before the
+    // field's own handling, and before that key lands.
     function interrupt(event: Event) {
-        if (!event.isTrusted || state !== "playing") return;
-        if (event.target instanceof Node && el.contains(event.target)) return;
+        if (!event.isTrusted || !playing) return;
         stop();
+        const target = event.target as Element | null;
+        handOver = event.type === "pointerdown" && !!target?.closest?.(".field");
     }
 
-    // "Type yourself": the field, ready, with the caret after the text.
-    function handOver() {
-        stop();
+    // The click after a tap on the sentence, by when the browser has put the
+    // caret where the tap landed: move it to the end of the text. Capture,
+    // because the field stops its clicks from bubbling.
+    function caretToEnd(event: Event) {
+        if (!handOver || !event.isTrusted) return;
+        handOver = false;
+        ready();
+    }
+
+    function ready() {
         const input = field();
         if (!input) return;
         input.focus({ preventScroll: true });
@@ -161,157 +147,29 @@
     }
 
     onMount(() => {
-        root = el.closest<HTMLElement>(".trie-root");
+        root = marker.closest<HTMLElement>(".trie-root");
         root?.addEventListener("pointerdown", interrupt, true);
         root?.addEventListener("keydown", interrupt, true);
+        root?.addEventListener("click", caretToEnd, true);
 
         if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-            instant = true;
             setText(END);
-            if (mouse()) handOver();
+            // Ready to type with a keyboard; a phone waits for its tap.
+            if (mouse()) ready();
             return;
         }
-        play();
+        playing = true;
+        setText("");
+        later(500, () => step());
     });
 
     onDestroy(() => {
         stop();
         root?.removeEventListener("pointerdown", interrupt, true);
         root?.removeEventListener("keydown", interrupt, true);
+        root?.removeEventListener("click", caretToEnd, true);
     });
 </script>
 
-<div class="autoplay" class:autoplay--instant={instant} bind:this={el}>
-    {#if state === "playing"}
-        <div class="bar">
-            <span class="dot" aria-hidden="true"></span>
-            <span class="status">Playing a demo</span>
-            <button class="button button--primary" type="button" on:click={handOver}>
-                Type yourself
-            </button>
-        </div>
-        <ol class="keys" aria-hidden="true">
-            {#each keys as label}
-                <li class="key" class:key--accept={label.length > 1}>{label}</li>
-            {/each}
-        </ol>
-    {:else if state === "done" && !instant}
-        <div class="bar bar--done">
-            <span class="turn">Your turn: keep typing.</span>
-            <button class="button" type="button" on:click={play}>↻ Replay the demo</button>
-        </div>
-    {/if}
-</div>
-
-<style>
-    /* Holds its height from playing to done, so stopping doesn't move the
-       field under a finger. */
-    .autoplay {
-        min-height: 84px;
-        margin-top: 20px;
-    }
-
-    .autoplay--instant {
-        min-height: 0;
-        margin: 0;
-    }
-
-    .bar {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 6px 6px 6px 14px;
-        border-radius: 12px;
-        font-size: 15px;
-        color: #fff;
-        background-color: rgb(31, 41, 55);
-    }
-
-    .bar--done {
-        flex-wrap: wrap;
-        gap: 0 16px;
-        padding: 0;
-        color: rgb(17, 17, 17);
-        background: none;
-    }
-
-    .turn {
-        font-weight: 600;
-    }
-
-    .dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background-color: rgb(90, 209, 154);
-        animation: pulse 1.2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-        50% {
-            opacity: 0.3;
-        }
-    }
-
-    .status {
-        flex: 1;
-    }
-
-    .button {
-        all: unset;
-        padding: 10px 14px;
-        border-radius: 999px;
-        font-size: 15px;
-        font-weight: 600;
-        color: rgb(70, 80, 94);
-        cursor: pointer;
-    }
-
-    .bar--done .button {
-        padding: 10px 0;
-        font-weight: 500;
-        text-decoration: underline dotted rgb(160, 172, 187);
-        text-underline-offset: 4px;
-    }
-
-    .button--primary {
-        color: rgb(17, 17, 17);
-        background-color: #fff;
-    }
-
-    .button:focus-visible {
-        outline: 2px solid rgb(47, 143, 98);
-        outline-offset: 2px;
-    }
-
-    .keys {
-        display: flex;
-        justify-content: flex-end;
-        gap: 6px;
-        height: 30px;
-        margin-top: 10px;
-        overflow: hidden;
-    }
-
-    .key {
-        flex: none;
-        min-width: 28px;
-        height: 28px;
-        padding: 0 7px;
-        border: 1px solid rgb(201, 208, 218);
-        border-bottom-width: 2px;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 600;
-        line-height: 25px;
-        text-align: center;
-        color: rgb(51, 51, 51);
-        background-color: #fff;
-    }
-
-    .key--accept {
-        border-color: rgb(47, 143, 98);
-        color: #fff;
-        background-color: rgb(47, 143, 98);
-    }
-</style>
+<!-- Renders nothing; it only marks where the app's root is. -->
+<span hidden bind:this={marker}></span>
