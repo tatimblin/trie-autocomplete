@@ -62,7 +62,7 @@ describe("search", () => {
 	});
 
 	it("does not resume from the previous search", () => {
-		// Trie.search alone answers "y" with ["they"] after "the".
+		// @tristimb/data-structures before 0.6.2 answered "y" with ["they"] after "the".
 		search("the");
 		expect(search("y")[0]).toBe("you");
 		search("wor");

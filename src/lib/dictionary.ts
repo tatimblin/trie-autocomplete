@@ -10,19 +10,7 @@ const trie = new Trie();
 // most common first.
 words.forEach((word, rank) => trie.add(word, rank));
 
-// A prefix no word starts with, searched to reset the Trie (see below).
-const RESET = "\u0000";
-
-/**
- * Every word starting with `prefix`, most common first.
- *
- * Trie.search (in @tristimb/data-structures 0.5.0) resumes from the node the
- * previous search ended on, so after "the" a search for "y" walks t-h-e-y and
- * answers ["they"]. A search that fails sends it back to the root, so one
- * runs first. An empty prefix answers nothing rather than a whole subtree.
- */
+/** Every word starting with `prefix`, most common first; nothing for "". */
 export function search(prefix: string): string[] {
-	if (!prefix) return [];
-	trie.search(RESET);
 	return trie.search(prefix);
 }
