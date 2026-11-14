@@ -7,8 +7,10 @@
     <main class="column">
         <h1 class="title">Trie type-ahead</h1>
         <p class="lead">
-            Type anything. The faded letters are the trie’s guess for the rest of
-            the word, from the 10,000 most common English words.
+            Autocomplete type-ahead implemented as a trie tree over 10,000 common
+            English words. Candidates are ranked by word frequency and how often
+            they follow the previous word. Frequency is counted with a bigram
+            table.
         </p>
         <Autoplay />
         <div class="editor">

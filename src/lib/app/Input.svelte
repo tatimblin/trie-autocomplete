@@ -153,8 +153,6 @@
             {/each}
             {#if more}<li class="alts-more" aria-hidden="true">…</li>{/if}
         </ul>
-    {:else}
-        <span class="alts-label">Start a word to see suggestions.</span>
     {/if}
 </div>
 
