@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cycle, matchCase, parseContext, suggest } from "./suggest";
+import { cycle, matchCase, parseContext, suggest, wordsIn } from "./suggest";
 import { search, words } from "./dictionary";
 import { parseWords } from "./words";
 
@@ -27,6 +27,32 @@ describe("parseContext", () => {
 		expect(parseContext("Hello. Wor").prior).toBeNull();
 		expect(parseContext("Hello, wor").prior).toBeNull();
 		expect(parseContext("wor").prior).toBeNull();
+	});
+});
+
+describe("wordsIn", () => {
+	it("lists finished words with the word before each", () => {
+		expect(wordsIn("Hello World ")).toEqual([
+			{ word: "hello", prior: null },
+			{ word: "world", prior: "hello" },
+		]);
+	});
+
+	it("leaves out the word being typed", () => {
+		expect(wordsIn("Hello Wor").map((w) => w.word)).toEqual(["hello"]);
+		expect(wordsIn("Hello")).toEqual([]);
+	});
+
+	it("drops punctuation around a word, and the prior across it", () => {
+		expect(wordsIn('Hello, "world." again ')).toEqual([
+			{ word: "hello", prior: null },
+			{ word: "world", prior: null },
+			{ word: "again", prior: null },
+		]);
+	});
+
+	it("skips tokens that aren't plain words", () => {
+		expect(wordsIn("don't e-mail 3rd ok ").map((w) => w.word)).toEqual(["ok"]);
 	});
 });
 

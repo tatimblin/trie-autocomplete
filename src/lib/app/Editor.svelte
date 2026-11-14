@@ -1,10 +1,16 @@
 <script lang="ts">
-	import { search } from "$lib/dictionary";
+	import { search, words } from "$lib/dictionary";
+	import { ranker } from "$lib/rank";
+	import { Session } from "$lib/session";
 	import { cycle, parseContext, suggest } from "$lib/suggest";
     import Input from "./Input.svelte";
 
     let input = "Hello Wor";
     let index = 0;
+
+    // What's been typed here, for as long as the field is on the page.
+    const session = new Session();
+    const lookup = ranker({ search, words, session });
 
     function handleAppend(e: CustomEvent<string>) {
         if (e.detail) {
@@ -24,7 +30,12 @@
     }
 
     $: context = parseContext(input);
-    $: suggestions = suggest(search, context);
+    let suggestions: string[] = [];
+    $: {
+        // Learn the text first, so the suggestions count it.
+        session.observe(input);
+        suggestions = suggest(lookup, context);
+    }
     $: typeahead = suggestions[index]?.slice(context.partial.length) ?? "";
 </script>
 
