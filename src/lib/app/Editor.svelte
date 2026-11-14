@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { search, words } from "$lib/dictionary";
+	import { nextWords, search, words } from "$lib/dictionary";
 	import { ranker } from "$lib/rank";
 	import { Session } from "$lib/session";
 	import { cycle, parseContext, suggest } from "$lib/suggest";
@@ -10,7 +10,7 @@
 
     // What's been typed here, for as long as the field is on the page.
     const session = new Session();
-    const lookup = ranker({ search, words, session });
+    const lookup = ranker({ search, words, nextWords, session });
 
     function handleAppend(e: CustomEvent<string>) {
         if (e.detail) {

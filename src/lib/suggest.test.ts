@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cycle, matchCase, parseContext, suggest, wordsIn } from "./suggest";
+import { START, cycle, matchCase, parseContext, suggest, wordsIn } from "./suggest";
 import { search, words } from "./dictionary";
 import { parseWords } from "./words";
 
@@ -24,16 +24,25 @@ describe("parseContext", () => {
 	});
 
 	it("has no prior word across punctuation", () => {
-		expect(parseContext("Hello. Wor").prior).toBeNull();
 		expect(parseContext("Hello, wor").prior).toBeNull();
-		expect(parseContext("wor").prior).toBeNull();
+		expect(parseContext('"Hello" wor').prior).toBeNull();
+		expect(parseContext("Hello (wor").prior).toBeNull();
+	});
+
+	it("marks the start of the text or a sentence", () => {
+		expect(parseContext("wor").prior).toBe(START);
+		expect(parseContext("").prior).toBe(START);
+		expect(parseContext(" wor").prior).toBe(START);
+		expect(parseContext("Hello. Wor").prior).toBe(START);
+		expect(parseContext("Really? Wor").prior).toBe(START);
+		expect(parseContext('She said "hi!" Wor').prior).toBe(START);
 	});
 });
 
 describe("wordsIn", () => {
 	it("lists finished words with the word before each", () => {
 		expect(wordsIn("Hello World ")).toEqual([
-			{ word: "hello", prior: null },
+			{ word: "hello", prior: START },
 			{ word: "world", prior: "hello" },
 		]);
 	});
@@ -43,11 +52,11 @@ describe("wordsIn", () => {
 		expect(wordsIn("Hello")).toEqual([]);
 	});
 
-	it("drops punctuation around a word, and the prior across it", () => {
+	it("drops punctuation around a word, and the prior across it unless a sentence ended", () => {
 		expect(wordsIn('Hello, "world." again ')).toEqual([
-			{ word: "hello", prior: null },
+			{ word: "hello", prior: START },
 			{ word: "world", prior: null },
-			{ word: "again", prior: null },
+			{ word: "again", prior: START },
 		]);
 	});
 
