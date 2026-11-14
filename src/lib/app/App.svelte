@@ -7,8 +7,11 @@
     <main class="column">
         <h1 class="title">Trie type-ahead</h1>
         <p class="lead">
-            Type anything. The faded letters are the trie’s guess for the rest of
-            the word, from the 10,000 most common English words.
+            Each letter walks one node down a trie of the 10,000 most common
+            English words; every word below that node is a candidate. Candidates
+            are ranked by word frequency, by how often they follow the previous
+            word (a 500-word bigram table from Tatoeba), and by the words already
+            typed on the page. The top one is the faded completion.
         </p>
         <Autoplay />
         <div class="editor">
